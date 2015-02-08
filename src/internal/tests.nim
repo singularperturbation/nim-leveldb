@@ -18,16 +18,13 @@ proc `$`(x: cstring, length: ptr csize): string=
 
 proc doCleanup(){.noConv.}=
   dealloc(read_length)
-  leveldb_free(db)
+  leveldb_close(db)
   leveldb_free(err)
   leveldb_free(WriteOpts)
   leveldb_free(ReadOpts)
   leveldb_free(testOpts)
-  if haveReadInput:
-    leveldb_free(input)
 
 proc doTests()=
-  addQuitProc(doCleanup)
   echo "Testing LevelDB: " & $leveldb_major_version() & "." & $leveldb_minor_version()
   echo "Creating temp database: " & DBname
   leveldb_options_set_create_if_missing(testOpts,cuchar(1))
@@ -35,6 +32,7 @@ proc doTests()=
 
   if (not isNil(err)):
     echo "Error opening DB!"
+    doCleanup()
     quit(QuitFailure)
   
   echo """Database created... inserting 1 to 100 as array of test
@@ -61,7 +59,13 @@ proc doTests()=
     input = leveldb_get(db,ReadOpts,$i,($i).len.csize,read_length,err)
     if ((input $ read_length) != $j) or (not isNil(err)):
       echo "Expected: " & $j & ", but got: " & ( input $ read_length)
+      leveldb_free(input)
+      doCleanup()
       quit(QuitFailure)
     echo "Looked up " & $i & " and got " & (input $ read_length) & " successfully"
+    # Necessary, because otherwise input is being fed a char* from leveldb_get
+    # which is then never cleaned up.
+    leveldb_free(input)
 
+  doCleanup()
   quit(QuitSuccess)
