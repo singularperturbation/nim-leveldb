@@ -8,13 +8,13 @@ var
   haveReadInput: bool = false
   input: cstring
   j: int
-  read_length: ptr csize
+  read_length: csize
   WriteOpts: WriteOptions = leveldb_writeoptions_create()
   ReadOpts:  ReadOptions  = leveldb_readoptions_create()
 
-proc `$`(x: cstring, length: ptr csize): string=
-  result = newString(length[])
-  copyMem(addr result[0], x, length[])
+proc `$`(x: cstring, length: csize): string=
+  result = newString(length)
+  copyMem(addr result[0], x, length)
 
 proc doCleanup(){.noConv.}=
   leveldb_free(db)
@@ -57,7 +57,7 @@ proc doTests()=
 
   for i in 1..100:
     j = i*i
-    input = leveldb_get(db,ReadOpts,$i,($i).len.csize,read_length,err)
+    input = leveldb_get(db,ReadOpts,$i,($i).len.csize,addr read_length,err)
     if ((input $ read_length) != $j) or (not isNil(err)):
       echo "Expected: " & $j & ", but got: " & ( input $ read_length)
       quit(QuitFailure)
