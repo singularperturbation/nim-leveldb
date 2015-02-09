@@ -302,5 +302,5 @@ proc leveldb_minor_version*(): cint {.importc: "leveldb_minor_version",
                                       dynlib: libleveldb.}
 
 when isMainModule:
-  include "internal/tests"
+  include "tests"
   doTests()
