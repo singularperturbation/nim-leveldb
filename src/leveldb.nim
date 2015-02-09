@@ -54,7 +54,7 @@ const
 ## DB operations
 
 proc leveldb_open*(options: Options; name: cstring;
-                   errptr: cstringArray): LevelDB {.
+                   errptr: ptr cstring): LevelDB {.
                                           importc: "leveldb_open",
                                           dynlib: libleveldb.}
 
@@ -63,15 +63,15 @@ proc leveldb_close*(db: LevelDB) {.
 
 proc leveldb_put*(db: LevelDB; options: WriteOptions;
                   key: cstring; keylen: csize; val: cstring; vallen: csize;
-                  errptr: cstringArray) {.
+                  errptr: ptr cstring) {.
      importc: "leveldb_put", dynlib: libleveldb.}
 
 proc leveldb_delete*(db: LevelDB; options: WriteOptions;
-                     key: cstring; keylen: csize; errptr: cstringArray) {.
+                     key: cstring; keylen: csize; errptr: ptr cstring) {.
      importc: "leveldb_delete", dynlib: libleveldb.}
 
 proc leveldb_write*(db: LevelDB; options: WriteOptions;
-                    batch: WriteBatch; errptr: cstringArray) {.
+                    batch: WriteBatch; errptr: ptr cstring) {.
      importc: "leveldb_write", dynlib: libleveldb.}
 
 # Returns NULL if not found.  A malloc()ed array otherwise.
@@ -79,7 +79,7 @@ proc leveldb_write*(db: LevelDB; options: WriteOptions;
 
 proc leveldb_get*(db: LevelDB; options: ReadOptions;
                   key: cstring; keylen: csize; vallen: ptr csize;
-                  errptr: cstringArray): cstring {.
+                  errptr: ptr cstring): cstring {.
      importc: "leveldb_get", dynlib: libleveldb.}
 
 proc leveldb_create_iterator*(db: LevelDB;
@@ -99,9 +99,9 @@ proc leveldb_property_value*(db: LevelDB; propname: cstring): cstring {.
     importc: "leveldb_property_value", dynlib: libleveldb.}
 
 proc leveldb_approximate_sizes*(db: LevelDB; num_ranges: cint;
-                                range_start_key: cstringArray;
+                                range_start_key: ptr cstring;
                                 range_start_key_len: ptr csize;
-                                range_limit_key: cstringArray;
+                                range_limit_key: ptr cstring;
                                 range_limit_key_len: ptr csize;
                                 sizes: ptr uint64_t) {.
     importc: "leveldb_approximate_sizes", dynlib: libleveldb.}
@@ -114,11 +114,11 @@ proc leveldb_compact_range*(db: LevelDB; start_key: cstring;
 
 ## Management operations
 proc leveldb_destroy_db*(options: Options; name: cstring;
-                         errptr: cstringArray) {.
+                         errptr: ptr cstring) {.
      importc: "leveldb_destroy_db", dynlib: libleveldb.}
 
 proc leveldb_repair_db*(options: Options; name: cstring;
-                        errptr: cstringArray) {.
+                        errptr: ptr cstring) {.
      importc: "leveldb_repair_db", dynlib: libleveldb.}
 
 ## Iterator
@@ -149,7 +149,7 @@ proc leveldb_iter_key*(a2: Iterator; klen: ptr csize): cstring {.
 proc leveldb_iter_value*(a2: Iterator; vlen: ptr csize): cstring {.
      importc: "leveldb_iter_value", dynlib: libleveldb.}
 
-proc leveldb_iter_get_error*(a2: Iterator; errptr: cstringArray) {.
+proc leveldb_iter_get_error*(a2: Iterator; errptr: ptr cstring) {.
      importc: "leveldb_iter_get_error", dynlib: libleveldb.}
 
 
@@ -229,7 +229,7 @@ proc leveldb_comparator_destroy*(a2: ptr leveldb_comparator_t) {.
 ## Filter policy
 proc leveldb_filterpolicy_create*(state: pointer; destructor: proc(a2: pointer);
                                   create_filter: proc(a2: pointer;
-                                                      key_array: cstringArray;
+                                                      key_array: ptr cstring;
                                                       key_length_array: ptr csize;
                                                       num_keys: cint;
                                                       filter_length: ptr csize): cstring;

@@ -4,7 +4,7 @@ const
 var
   testOpts: Options = leveldb_options_create()
   db: LevelDB
-  err: cstringArray
+  err: ptr cstring    = cast[ptr cstring](alloc0(sizeof(ptr cstring)))
   haveReadInput: bool = false
   input: cstring
   j: int
@@ -17,9 +17,11 @@ proc `$`(x: cstring, length: ptr csize): string=
   copyMem(addr result[0], x, length[])
 
 proc doCleanup(){.noConv.}=
-  dealloc(read_length)
   leveldb_close(db)
-  leveldb_free(err)
+  leveldb_destroy_db(testOpts, DBname, err)
+  leveldb_free(err[])
+  dealloc(read_length)
+  dealloc(err)
   leveldb_free(WriteOpts)
   leveldb_free(ReadOpts)
   leveldb_free(testOpts)
@@ -30,7 +32,7 @@ proc doTests()=
   leveldb_options_set_create_if_missing(testOpts,cuchar(1))
   db = leveldb_open(testOpts,DBname,err)
 
-  if (not isNil(err)):
+  if (not isNil(err[])):
     echo "Error opening DB!"
     doCleanup()
     quit(QuitFailure)
@@ -45,7 +47,7 @@ proc doTests()=
     j = i*i
     echo "Writing key: " & $i & " with value " & $j
     leveldb_put(db,WriteOpts,cstring($i),csize(len($i)),cstring($j),csize(len($j)),err)
-    if (not isNil(err)):
+    if (not isNil(err[])):
       echo "Error writing key " & $i & " with value " & $j
       quit(QuitFailure)
 
@@ -57,7 +59,7 @@ proc doTests()=
   for i in 1..100:
     j = i*i
     input = leveldb_get(db,ReadOpts,$i,($i).len.csize,read_length,err)
-    if ((input $ read_length) != $j) or (not isNil(err)):
+    if ((input $ read_length) != $j) or (not isNil(err[])):
       echo "Expected: " & $j & ", but got: " & ( input $ read_length)
       leveldb_free(input)
       doCleanup()
