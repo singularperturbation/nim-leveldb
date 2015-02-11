@@ -1,4 +1,5 @@
-# Nim Wrapper for LevelDB (HIGH LEVEL WRAPPER STILL NEEDS TO BE WRITTEN)
+# Nim Wrapper for LevelDB 
+# (HIGH LEVEL WRAPPER STILL NEEDS TO BE WRITTEN)
 
 This is a wrapper for the key-value store 
 [LevelDB](https://github.com/google/leveldb), and wraps the C API to provide
